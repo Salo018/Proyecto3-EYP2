@@ -56,4 +56,7 @@ head(df.punto1)
 head(df.consumo)
 
 
-#prueba de rama
+# ---------------- #
+# Punto 3: Consumo #
+# ---------------- #
+
