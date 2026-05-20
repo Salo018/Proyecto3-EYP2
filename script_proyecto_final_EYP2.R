@@ -54,3 +54,6 @@ df.consumo <- as.data.frame(consumo)
 head(df.viviendas)
 head(df.punto1)
 head(df.consumo)
+
+
+#prueba de rama
