@@ -70,3 +70,43 @@ sum(is.na(df.consumo))
 
 # Porcentaje de nulos 
 mean(is.na(df.consumo)) * 100
+
+# Grafico inicial
+ggplot(data = df.consumo, aes(x = Año, y = Consumo, color = Trimestre, group = Trimestre)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Año",
+    y = "Consumo personal (%)",
+    title = "Consumo personal trimestral (1960-1990)"
+  ) +
+  theme_minimal()
+
+# Crear la variable "Periodo" para unir el año con los trimestres
+df.consumo_copy <- df.consumo %>%
+  mutate(Trimestre_num = gsub("Trimestre_", "", Trimestre),
+         Periodo = paste(Año, Trimestre_num, sep = "-"))
+
+# Grafica con todos los años 
+ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo del consumo personal (1960-2016)"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# Graficar solo los años de 1960 a 1990 (esto es solo para probar)
+ggplot(data = df.consumo_copy %>% filter(Año >= 1960 & Año <= 1990),
+       aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo del consumo personal (1960-1990)"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
