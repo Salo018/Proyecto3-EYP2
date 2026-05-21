@@ -254,8 +254,6 @@ comparacion <- data.frame(
 print(comparacion)
 
 # Gráfico comparativo
-library(ggplot2)
-
 ggplot(comparacion, aes(x = Posicion)) +
   geom_point(aes(y = Real), color = "black", size = 3) +
   geom_point(aes(y = Moda), color = "red", size = 2) +
@@ -264,7 +262,22 @@ ggplot(comparacion, aes(x = Posicion)) +
        y = "Consumo", x = "Posición (índice)") +
   theme_minimal()
 
+# Aplicar la imputación por interpolación lineal al df con sus nulos originales
+# Dataset con la variable Periodo
+df.consumo_interp <- df.consumo_copy   
+# Imputar el nulo real con interpolación lineal
+df.consumo_interp$Consumo <- na.approx(df.consumo_interp$Consumo, na.rm = FALSE)
 
+
+ggplot(data = df.consumo_interp, aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo del consumo personal (1960-2016)"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
 
