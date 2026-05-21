@@ -54,3 +54,49 @@ df.consumo <- as.data.frame(consumo)
 head(df.viviendas)
 head(df.punto1)
 head(df.consumo)
+
+# Ver nulos
+nulos <- sum(is.na(df.punto1))
+nulos
+
+# Porcentaje de nulos
+por_nulos <- (nulos/nrow(df.punto1))*100
+por_nulos
+
+
+datos_1_limpio <- na.omit(df.punto1)
+
+ggplot(data = datos_1_limpio, aes(x = Semana, y = yt))+
+  geom_line() + geom_point() + labs(
+    x = "Semanas",
+    y = "Datos"
+  )
+
+# Comprobar media y varianza constante 
+
+# Dividir en 3 
+parte_1 <- datos_1_limpio$yt[1:7]
+parte_2 <- datos_1_limpio$yt[8:14]
+parte_3 <- datos_1_limpio$yt[15:20]
+
+
+# Medias
+cat("Media 1:", mean(parte_1))
+cat("Media 2:", mean(parte_2))
+cat("Media 3:", mean(parte_3))
+
+# Varianzas 
+cat("VarianzaV 1:", var(parte_1))
+cat("Varianza 2:", var(parte_2))
+cat("Varianza 3:", var(parte_3))
+
+# Medias y varianzas totales 
+cat("Media total:", mean(datos_1_limpio$yt))
+cat("Varianza total:", var(datos_1_limpio$yt))
+
+
+
+
+
+
+
