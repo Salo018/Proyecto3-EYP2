@@ -268,7 +268,7 @@ df.consumo_interp <- df.consumo_copy
 # Imputar el nulo real con interpolación lineal
 df.consumo_interp$Consumo <- na.approx(df.consumo_interp$Consumo, na.rm = FALSE)
 
-
+# Grafica con el df imputado 
 ggplot(data = df.consumo_interp, aes(x = Periodo, y = Consumo, group = 1)) +
   geom_line(color = "blue") +
   geom_point(color = "red") +
@@ -279,9 +279,33 @@ ggplot(data = df.consumo_interp, aes(x = Periodo, y = Consumo, group = 1)) +
   ) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+# PENDIENTE -------------------------
+acf(df.consumo_interp$Consumo)
+pacf(df.consumo_interp$Consumo)
 
+# Comprobacion si la serie es estacionaria
 
+# Dividir en 4 partes 
+p3_parte_1 <- df.consumo_interp$Consumo[1:47]
+p3_parte_2 <- df.consumo_interp$Consumo[48:93]
+p3_parte_3 <- df.consumo_interp$Consumo[94:140]
+p3_parte_4 <- df.consumo_interp$Consumo[141:187]
 
+# Medias
+cat("Media 1:", mean(p3_parte_1))
+cat("Media 2:", mean(p3_parte_2))
+cat("Media 3:", mean(p3_parte_3))
+cat("Media 4:", mean(p3_parte_4))
+
+# Varianzas 
+cat("Varianza 1:", var(p3_parte_1))
+cat("Varianza 2:", var(p3_parte_2))
+cat("Varianza 3:", var(p3_parte_3))
+cat("Varianza 4:", var(p3_parte_4))
+
+# Medias y varianzas totales 
+cat("Media total:", mean(df.consumo_interp$Consumo))
+cat("Varianza total:", var(df.consumo_interp$Consumo))
 
 
 
