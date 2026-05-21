@@ -102,7 +102,6 @@ pacf(datos_1_limpio$yt)
 
 # Probar Modelos
 #Suavizacion exponencial simple
-
 suavizacion_simple_p_1 <- function(datos, alpha) {
   
   y <- datos$yt
@@ -154,8 +153,8 @@ metricas_error_p_1(p_0.5)
 metricas_error_p_1(p_0.8)
 
 
-#Gráfica
-plot(y_datos_1, type = "o", col = "blue", ylim = range(c(y_datos_1, y_hat)), 
+# Gráfica
+plot(datos_1_limpio, type = "o", col = "blue", ylim = range(c(datos_1_limpio, y_hat)), 
      xlab = "Semanas", ylab = "Datos")
 lines(y_hat, type = "o", col = "red")
 legend("topleft", legend = c("Real", "Pronóstico"),
