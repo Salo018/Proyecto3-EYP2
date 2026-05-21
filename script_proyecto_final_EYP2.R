@@ -60,3 +60,13 @@ head(df.consumo)
 # Punto 3: Consumo #
 # ---------------- #
 
+# Revisar valores unicos en cada columna
+unique(df.consumo$Año)
+unique(df.consumo$Trimestre)
+unique(df.consumo$Consumo)
+
+# Revisar nulos
+sum(is.na(df.consumo))
+
+# Porcentaje de nulos 
+mean(is.na(df.consumo)) * 100
