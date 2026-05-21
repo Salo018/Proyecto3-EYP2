@@ -16,6 +16,8 @@ library(purrr)
 library(dplyr)
 library(stringr)
 library(readxl)
+library(zoo)
+library(tidyr)
 
 # Carga de datos desde GitHub
 
@@ -55,6 +57,11 @@ head(df.viviendas)
 head(df.punto1)
 head(df.consumo)
 
+# ---------------- #
+# Punto 1:         #
+# ---------------- #
+
+# EDA PARA PUNTO 1
 
 # Ver nulos
 nulos <- sum(is.na(df.punto1))
@@ -152,10 +159,3 @@ metricas_error_p_1(p_0.3)
 metricas_error_p_1(p_0.5)
 metricas_error_p_1(p_0.8)
 
-
-# Gráfica
-plot(datos_1_limpio, type = "o", col = "blue", ylim = range(c(datos_1_limpio, y_hat)), 
-     xlab = "Semanas", ylab = "Datos")
-lines(y_hat, type = "o", col = "red")
-legend("topleft", legend = c("Real", "Pronóstico"),
-       col = c("blue", "red"), lty = 1)
