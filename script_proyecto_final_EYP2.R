@@ -56,6 +56,8 @@ head(df.viviendas)
 head(df.punto1)
 head(df.consumo)
 
+###### Subir mi punto desde aquí ######
+
 
 # ---------------- #
 # Punto 3: Consumo #
@@ -115,6 +117,7 @@ ggplot(data = df.consumo_copy %>% filter(Año >= 1960 & Año <= 1990),
   ) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+# PRUEBAS DE MÉTODOS DE IMPUTACIÓN
 
 # Crear un df sin nulos 
 df.sin_nulos <- df.consumo %>% filter(!is.na(Consumo))
@@ -146,7 +149,7 @@ ggplot(df.sin_nulos_copy, aes(x = Periodo, y = Consumo)) +
 
 # PROCEDIMIENTO PARA EVALUAR METODOS DE IMPUTACIÓN
 
-# Crear nulos artificiales 5% mas o menos 
+# Crear nulos artificiales 5% 
 
 # Numero total de registros
 n_total <- nrow(df.sin_nulos_copy)
@@ -164,7 +167,7 @@ pos_outliers <- which(abs(df.sin_nulos$z_score) > 3)
 faltan <- n_nulos - length(pos_outliers)
 
 # Seleccionar posiciones aleatorias adicionales
-set.seed(2242055)  # para reproducibilidad
+set.seed(2242055)  # Semilla para reproducibilidad
 pos_extra <- sample(setdiff(1:n_total, pos_outliers), faltan)
 
 # Unir todas las posiciones
@@ -174,9 +177,9 @@ pos_nulos <- c(pos_outliers, pos_extra)
 df.nulos_artificiales <- df.sin_nulos
 df.nulos_artificiales$Consumo[pos_nulos] <- NA
 
-# IMPUTACIÓN #
+# IMPUTACIÓN 
 
-# FUNCIONES DE EVALUACIÓN
+## FUNCIONES DE EVALUACIÓN
 
 # Función para ECM
 calc_ecm <- function(original, imputado, posiciones) {
@@ -196,7 +199,7 @@ calc_rmse <- function(real, imputado, pos) {
   sqrt(mean((real[pos] - imputado[pos])^2, na.rm = TRUE))
 }
 
-# Imputación con distintos metodos
+# Imputación con distintos métodos
 
 # Imputación con MEDIA
 media_val <- mean(df.sin_nulos$Consumo, na.rm = TRUE)
@@ -273,7 +276,7 @@ rmse_locf <- calc_rmse(df.sin_nulos$Consumo, df.locf$Consumo, pos_nulos)
 
 # COMPARAR RESULTADOS 
 
-# Comparar resultados en un data.frame
+# Comparar resultados en un df
 resultados <- data.frame(
   Metodo = c("Media", "Mediana", "Moda", "Interpolación", "Medias Móviles", "LOCF"),
   ECM = c(ecm_media, ecm_mediana, ecm_moda, ecm_interp, ecm_mm, ecm_locf),
@@ -284,130 +287,122 @@ resultados <- data.frame(
 
 print(resultados)
 
-# Mostrar resultados ordenados de menor a mayor ECM
-resultados <- resultados[order(resultados$ECM), ]
-print(resultados)
+# Top 3 métodos con mejores resultados
+cat("\nTop 3 con mejores resultados\n")
 
-# Método ganador
-mejor_metodo <- resultados$Metodo[1]
-mejor_ecm <- resultados$ECM[1]
+mejores_ecm <- resultados[order(resultados$ECM), ][1:3, c("Metodo","ECM")]
+print(mejores_ecm)
 
-cat("El mejor método es:", mejor_metodo, "con ECM =", mejor_ecm, "\n")
+mejores_mae <- resultados[order(resultados$MAE), ][1:3, c("Metodo","MAE")]
+print(mejores_mae)
 
-# Mejor por MAE
-mejor_metodo_mae <- resultados$Metodo[which.min(resultados$MAE)]
-mejor_mae <- min(resultados$MAE)
+mejores_mape <- resultados[order(resultados$MAPE), ][1:3, c("Metodo","MAPE")]
+print(mejores_mape)
 
-cat("El mejor método según MAE es:", mejor_metodo_mae, "con MAE =", mejor_mae, "\n")
+mejores_rmse <- resultados[order(resultados$RMSE), ][1:3, c("Metodo","RMSE")]
+print(mejores_rmse)
 
-# Mejor por MAPE
-mejor_metodo_mape <- resultados$Metodo[which.min(resultados$MAPE)]
-mejor_mape <- min(resultados$MAPE)
-
-cat("El mejor método según MAPE es:", mejor_metodo_mape, "con MAPE =", mejor_mape, "\n")
-
-# Mejor por RMSE
-mejor_metodo_rmse <- resultados$Metodo[which.min(resultados$RMSE)]
-mejor_rmse <- min(resultados$RMSE)
-
-cat("El mejor método según RMSE es:", mejor_metodo_rmse, "con RMSE =", mejor_rmse, "\n")
+# Comparación con los métodos con mejores resultados
 
 # Valores originales en las posiciones de nulos
 valores_reales <- df.sin_nulos$Consumo[pos_nulos]
 
 # Valores imputados por cada método
 valores_moda <- df.moda$Consumo[pos_nulos]
-valores_interp <- df.interp$Consumo[pos_nulos]
+valores_locf <- df.locf$Consumo[pos_nulos]
 valores_mm <- df.mm$Consumo[pos_nulos]
 
-# DataFrame comparativo
+# Df comparativo
 comparacion <- data.frame(
   Posicion = pos_nulos,
   Real = valores_reales,
   Moda = valores_moda,
-  Interpolacion = valores_interp,
+  LOCF = valores_locf,
   MM = valores_mm
 )
 
 print(comparacion)
 
-# Gráfico comparativo Moda vs Interpolación vs LOCF
+# Gráfico comparativo Moda vs LOCF vs MM
 ggplot(comparacion, aes(x = Posicion)) +
   geom_point(aes(y = Real), color = "black", size = 3) +
   geom_point(aes(y = Moda), color = "red", size = 2) +
-  geom_point(aes(y = Interpolacion), color = "blue", size = 2) +
+  geom_point(aes(y = LOCF), color = "blue", size = 2) +
   geom_point(aes(y = MM), color = "green", size = 2) +
-  labs(title = "Comparación imputación: Moda vs Interpolación vs MM",
+  labs(title = "Comparación imputación: Moda vs LOCF vs MM",
        y = "Consumo", x = "Posición (índice)") +
   theme_minimal()
 
 # Mostrar las varianzas de cada método y del original
 data.frame(
-  Metodo = c("Original", "Media", "Mediana", "Moda", "Interpolación", "Medias Móviles", "LOCF"),
+  Metodo = c("Original", "Moda", "Medias Móviles", "LOCF"),
   Varianza = c(
     var(df.sin_nulos$Consumo, na.rm = TRUE),
-    var(df.media$Consumo, na.rm = TRUE),
-    var(df.mediana$Consumo, na.rm = TRUE),
     var(df.moda$Consumo, na.rm = TRUE),
-    var(df.interp$Consumo, na.rm = TRUE),
     var(df.mm$Consumo, na.rm = TRUE),
     var(df.locf$Consumo, na.rm = TRUE)
   )
 )
 
+# VISUALIZAR LOS 3 MÉTODOS APLICADOS PARA ESCOGER EL MEJOR
 
-# Crear la variable "Periodo" para unir el año con los trimestres
+# Moda
+df.moda_copy <- df.moda %>%
+  mutate(Trimestre_num = gsub("Trimestre_", "", Trimestre),
+         Periodo = paste(Año, Trimestre_num, sep = "-"))
+# Grafica  
+ggplot(data = df.moda_copy, aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo imputada con moda"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# Locf
 df.locf_copy <- df.locf %>%
   mutate(Trimestre_num = gsub("Trimestre_", "", Trimestre),
          Periodo = paste(Año, Trimestre_num, sep = "-"))
-
-# Grafica con todos los años 
+# Grafica  
 ggplot(data = df.locf_copy, aes(x = Periodo, y = Consumo, group = 1)) +
   geom_line(color = "blue") +
   geom_point(color = "red") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
-    title = "Serie de tiempo del consumo personal (1960-2016)"
+    title = "Serie de tiempo imputada con locf"
   ) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-##compa
-
-# Crear la variable "Periodo" para unir el año con los trimestres
-df.consumo_copy <- df.consumo %>%
-  mutate(Trimestre_num = gsub("Trimestre_", "", Trimestre),
-         Periodo = paste(Año, Trimestre_num, sep = "-"))
-
-# Grafica con todos los años 
-ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
-  labs(
-    x = "Periodo (Año-Trimestre)",
-    y = "Consumo personal (%)",
-    title = "Serie de tiempo del consumo personal (1960-2016)"
-  ) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-### medias moviles
-# Crear la variable "Periodo" para unir el año con los trimestres
+# Medias móviles
 df.mm_copy <- df.mm %>%
   mutate(Trimestre_num = gsub("Trimestre_", "", Trimestre),
          Periodo = paste(Año, Trimestre_num, sep = "-"))
-
-# Grafica con todos los años 
+# Grafica 
 ggplot(data = df.mm_copy, aes(x = Periodo, y = Consumo, group = 1)) +
   geom_line(color = "blue") +
   geom_point(color = "red") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
-    title = "Serie de tiempo del consumo personal (1960-2016)"
+    title = "Serie de tiempo imputada con mm"
   ) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+# Comparar con el df de prueba
+
+# Grafica con todos los años 
+ggplot(data = df.sin_nulos_copy, aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo prueba"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 # IMPUTACIÓN AL DF ORIGINAL
 
@@ -429,6 +424,125 @@ data.frame(
     var(df.consumo_imp$Consumo, na.rm = TRUE)
   )
 )
+
+# Revisar visualmente
+# Original
+ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo original"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# Imputado
+ggplot(data = df.consumo_imp, aes(x = Periodo, y = Consumo, group = 1)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(
+    x = "Periodo (Año-Trimestre)",
+    y = "Consumo personal (%)",
+    title = "Serie de tiempo original imputada"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# Comprobación de componentes de la serie de tiempo 
+# Descomposición
+consumo_ts <- ts(df.consumo_imp$Consumo,
+                 start = c(1970, 1),   # año inicial y trimestre inicial
+                 frequency = 4)        # frecuencia trimestral
+
+# Descomposición aditiva
+descomp_add <- decompose(consumo_ts, type = "additive")
+plot(descomp_add)
+
+# Comprobacion si la serie es estacionaria con acf y pacf
+acf(df.consumo_imp$Consumo)
+pacf(df.consumo_imp$Consumo)
+
+# Comprobacion si la serie es estacionaria dividiendola en partes
+# Dividir en 4 partes 
+p3_parte_1 <- df.consumo_imp$Consumo[1:47]
+p3_parte_2 <- df.consumo_imp$Consumo[48:93]
+p3_parte_3 <- df.consumo_imp$Consumo[94:140]
+p3_parte_4 <- df.consumo_imp$Consumo[141:187]
+
+# Medias
+cat("Media 1:", mean(p3_parte_1))
+cat("Media 2:", mean(p3_parte_2))
+cat("Media 3:", mean(p3_parte_3))
+cat("Media 4:", mean(p3_parte_4))
+
+# Varianzas 
+cat("Varianza 1:", var(p3_parte_1))
+cat("Varianza 2:", var(p3_parte_2))
+cat("Varianza 3:", var(p3_parte_3))
+cat("Varianza 4:", var(p3_parte_4))
+
+# Medias y varianzas totales 
+cat("Media total:", mean(df.consumo_imp$Consumo))
+cat("Varianza total:", var(df.consumo_imp$Consumo))
+
+# SERIE NO ESTACIONARIA
+
+holt_winter_p_3 <- function(y, alpha = 0.3, beta = 0.2, gamma = 0.1, p = 4) {
+  # y: vector numérico con la serie
+  # alpha, beta, gamma: parámetros de suavización
+  # p: frecuencia estacional (4 = trimestral, 12 = mensual)
+  
+  n <- length(y)
+  
+  F <- numeric(n)      # Nivel
+  T <- numeric(n)      # Tendencia
+  S <- numeric(n)      # Estacionalidad
+  y_hat <- numeric(n)  # Pronóstico
+  
+  # Nivel inicial
+  F[p] <- mean(y[1:p])
+  
+  # Tendencia inicial
+  T[p] <- (mean(y[(p+1):(2*p)]) - mean(y[1:p])) / p
+  
+  # Índices estacionales iniciales
+  for (i in 1:p) {
+    S[i] <- y[i] / F[p]
+  }
+  
+  # Iteración Holt-Winters
+  for (t in (p+1):n) {
+    # Nivel
+    F[t] <- alpha * (y[t] / S[t-p]) + (1 - alpha) * (F[t-1] + T[t-1])
+    
+    # Tendencia
+    T[t] <- gamma * (F[t] - F[t-1]) + (1 - gamma) * T[t-1]
+    
+    # Estacionalidad
+    S[t] <- beta * (y[t] / F[t]) + (1 - beta) * S[t-p]
+    
+    # Pronóstico a 1 paso
+    y_hat[t] <- (F[t-1] + T[t-1]) * S[t-p]
+  }
+  
+  # Resultados en data.frame
+  resultados <- data.frame(
+    tiempo = 1:n,
+    real = y,
+    nivel = F,
+    tendencia = T,
+    estacional = S,
+    pronostico = y_hat,
+    error = y - y_hat
+  )
+}
+
+resultados_hw_p_3 <- holt_winter_p_3(df.consumo_imp$Consumo,
+                                    alpha = 0.3,
+                                    beta = 0.2,
+                                    gamma = 0.1,
+                                    p = 4)
+head(resultados_hw_p_3, 10)
 
 
 
