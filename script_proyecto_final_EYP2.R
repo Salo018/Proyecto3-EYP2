@@ -1,3 +1,4 @@
+
 # Instalar librerías solo si no están instaladas
 install.packages("ggplot2")    # Visualización
 install.packages("naniar")     # Datos faltantes
@@ -19,7 +20,7 @@ library(readxl)
 library(zoo)
 library(tidyr)
 
-# Carga de datos desde GitHub
+# CARGA DE DATOS DESDE GITHUB
 
 # URL de los archivos
 url_viviendas <- "https://raw.githubusercontent.com/Salo018/Proyecto3-EYP2/main/data/Viviendas.csv"
@@ -32,7 +33,7 @@ viviendas <- read.csv(
   sep = ";"
 )
 
-# Funcion para leer los archivos xlsx desde github
+# FUnción para leer los archivos xlsx 
 leer_excel <- function(url, sheet = 1) {
   temp <- tempfile(fileext = ".xlsx")
   download.file(
@@ -56,6 +57,8 @@ df.consumo <- as.data.frame(consumo)
 head(datos2)
 head(df.punto1)
 head(df.consumo)
+
+# SOLUCIÓN CASOS DE ESTUDIO
 
 # ---------------- #
 # Punto 1:         #
