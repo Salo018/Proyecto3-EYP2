@@ -611,16 +611,131 @@ for (t in 3:n) {
 }
 
 # Graficar original vs diferenciada
-par(mfrow = c(1,3))
 plot.ts(y, main = "Serie original (Consumo)", col = "blue")
 plot.ts(dl_y, main = "Diferenciada 1 vez", col = "red")
 plot.ts(dl_y2, main = "Diferenciada 2 veces", col = "darkgreen")
 
-acf(dl_y, main = "ACF primera diferencia")
-pacf(dl_y, main = "PACF primera diferencia")
+acf(dl_y)
+pacf(dl_y)
 
-acf(dl_y2, main = "ACF segunda diferencia")
-pacf(dl_y2, main = "PACF segunda diferencia")
+acf(dl_y2)
+pacf(dl_y2)
+
+acf(consumo_ts)
+pacf(consumo_ts)
+
+consumo_ts
 
 ## Ajustar un ARMA sobre la primera diferencia y comparar métricas 
+# Script de modelos ARMA(1,1), ARMA(1,2) y ARMA(2,1)
+# Funciones ARMA
+residuos_ARMA <- function(param, y, p, q){
+  n <- length(y)
+  cte <- param[1]
+  
+  phi <- if(p > 0) param[2:(p+1)] else numeric(0)
+  theta <- if(q > 0) param[(p+2):(p+q+1)] else numeric(0)
+  
+  e <- numeric(n)
+  inicio <- max(p, q) + 1
+  
+  for(t in inicio:n){
+    ar_part <- 0
+    ma_part <- 0
+    
+    if(p > 0){
+      for(i in 1:p){
+        ar_part <- ar_part + phi[i] * y[t-i]
+      }
+    }
+    if(q > 0){
+      for(j in 1:q){
+        ma_part <- ma_part + theta[j] * e[t-j]
+      }
+    }
+    e[t] <- y[t] - cte - ar_part - ma_part
+  }
+  return(e)
+}
+
+SSE_ARMA <- function(param, y, p, q){
+  e <- residuos_ARMA(param, y, p, q)
+  sum(e^2)
+}
+
+estimar_ARMA <- function(y, p, q){
+  n_param <- 1 + p + q
+  ini <- rep(0.1, n_param)
+  ajuste <- optim(par = ini, fn = SSE_ARMA, y = y, p = p, q = q)
+  return(list(coef = ajuste$par, value = ajuste$value))
+}
+
+ajustar_ARMA <- function(param, y, p, q){
+  n <- length(y)
+  cte <- param[1]
+  phi <- if(p > 0) param[2:(p+1)] else numeric(0)
+  theta <- if(q > 0) param[(p+2):(p+q+1)] else numeric(0)
+  
+  e <- numeric(n)
+  y_hat <- numeric(n)
+  inicio <- max(p, q) + 1
+  
+  for(t in inicio:n){
+    ar_part <- 0
+    ma_part <- 0
+    if(p > 0){
+      for(i in 1:p){
+        ar_part <- ar_part + phi[i] * y[t-i]
+      }
+    }
+    if(q > 0){
+      for(j in 1:q){
+        ma_part <- ma_part + theta[j] * e[t-j]
+      }
+    }
+    y_hat[t] <- cte + ar_part + ma_part
+    e[t] <- y[t] - y_hat[t]
+  }
+  return(list(y_hat = y_hat, e = e))
+}
+
+graficar_ARMA <- function(modelo, y, p, q, titulo){
+  ajuste <- ajustar_ARMA(modelo$coef, y, p, q)
+  
+  # Serie vs predicción SIN dividir ventana
+  plot(y, type = "l", col = "red",
+       main = titulo,
+       ylab = "Serie simulada", xlab = "Tiempo")
+  lines(ajuste$y_hat, col = "blue")
+
+}
+
+graficar_residuos <- function(modelo, y, p, q, titulo){
+  ajuste <- ajustar_ARMA(modelo$coef, y, p, q)
+  
+  # Panel de residuos
+  par(mfrow = c(1,3))
+  plot(ajuste$e, type = "l", main = paste("Residuos", titulo))
+  hist(ajuste$e, main = paste("Histograma", titulo))
+  acf(ajuste$e, main = paste("ACF Residuos", titulo))
+  par(mfrow = c(1,1))
+}
+
+# Estimar modelos
+arma11 <- estimar_ARMA(y, p = 1, q = 1)
+arma12 <- estimar_ARMA(y, p = 1, q = 2)
+arma21 <- estimar_ARMA(y, p = 2, q = 1)
+
+# Graficar resultados
+graficar_ARMA(arma11, y, p = 1, q = 1, titulo = "ARMA(1,1)")
+graficar_ARMA(arma12, y, p = 1, q = 2, titulo = "ARMA(1,2)")
+graficar_ARMA(arma21, y, p = 2, q = 1, titulo = "ARMA(2,1)")
+
+# Graficar residuos
+graficar_residuos(arma11, y, p = 1, q = 1, titulo = "ARMA(1,1)")
+graficar_residuos(arma12, y, p = 1, q = 2, titulo = "ARMA(1,2)")
+graficar_residuos(arma21, y, p = 2, q = 1, titulo = "ARMA(2,1)")
+
+
+
 
