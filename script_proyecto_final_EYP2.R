@@ -456,7 +456,7 @@ consumo_ts <- ts(df.consumo_imp$Consumo,
 
 # Descomposición aditiva
 descomp_add <- decompose(consumo_ts, type = "additive")
-plot(descomp_add)
+plot(descomp_add) 
 
 # Comprobacion si la serie es estacionaria con acf y pacf
 acf(df.consumo_imp$Consumo)
@@ -486,6 +486,12 @@ cat("Media total:", mean(df.consumo_imp$Consumo))
 cat("Varianza total:", var(df.consumo_imp$Consumo))
 
 # SERIE NO ESTACIONARIA
+
+plot.ts(df.consumo_imp$Consumo)
+
+# MODELOS 
+
+# Probar primer modelo
 
 holt_winter_p_3 <- function(y, alpha = 0.3, beta = 0.2, gamma = 0.1, p = 4) {
   # y: vector numérico con la serie
