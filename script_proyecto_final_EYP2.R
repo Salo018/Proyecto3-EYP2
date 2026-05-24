@@ -491,19 +491,15 @@ plot.ts(df.consumo_imp$Consumo)
 
 # MODELOS 
 
-# Probar primer modelo
-
+#Probar primer modelo: Suavización exponencial Holt-winter
+#p=4 porque la estacionalidad es trimestral
 holt_winter_p_3 <- function(y, alpha = 0.3, beta = 0.2, gamma = 0.1, p = 4) {
-  # y: vector numérico con la serie
-  # alpha, beta, gamma: parámetros de suavización
-  # p: frecuencia estacional (4 = trimestral, 12 = mensual)
-  
   n <- length(y)
   
-  F <- numeric(n)      # Nivel
-  T <- numeric(n)      # Tendencia
-  S <- numeric(n)      # Estacionalidad
-  y_hat <- numeric(n)  # Pronóstico
+  F <- numeric(n)      
+  T <- numeric(n)     
+  S <- numeric(n)     
+  y_hat <- numeric(n) 
   
   # Nivel inicial
   F[p] <- mean(y[1:p])
@@ -511,44 +507,120 @@ holt_winter_p_3 <- function(y, alpha = 0.3, beta = 0.2, gamma = 0.1, p = 4) {
   # Tendencia inicial
   T[p] <- (mean(y[(p+1):(2*p)]) - mean(y[1:p])) / p
   
-  # Índices estacionales iniciales
+  # Índices estacionales iniciales (promedio de varios ciclos si hay suficientes datos)
   for (i in 1:p) {
-    S[i] <- y[i] / F[p]
+    S[i] <- mean(y[seq(i, p*2, by=p)]) / F[p]
   }
   
-  # Iteración Holt-Winters
+  # Iteración Holt-Winter
   for (t in (p+1):n) {
     # Nivel
     F[t] <- alpha * (y[t] / S[t-p]) + (1 - alpha) * (F[t-1] + T[t-1])
-    
     # Tendencia
     T[t] <- gamma * (F[t] - F[t-1]) + (1 - gamma) * T[t-1]
-    
     # Estacionalidad
-    S[t] <- beta * (y[t] / F[t]) + (1 - beta) * S[t-p]
-    
-    # Pronóstico a 1 paso
+    S[t] <- beta  * (y[t] / F[t])   + (1 - beta)  * S[t-p]
+    # Pronóstico
     y_hat[t] <- (F[t-1] + T[t-1]) * S[t-p]
   }
   
-  # Resultados en data.frame
-  resultados <- data.frame(
-    tiempo = 1:n,
-    real = y,
-    nivel = F,
-    tendencia = T,
+  data.frame(
+    tiempo     = 1:n,
+    real       = y,
+    nivel      = F,
+    tendencia  = T,
     estacional = S,
     pronostico = y_hat,
-    error = y - y_hat
+    error      = y - y_hat
   )
 }
 
-resultados_hw_p_3 <- holt_winter_p_3(df.consumo_imp$Consumo,
-                                    alpha = 0.3,
-                                    beta = 0.2,
-                                    gamma = 0.1,
-                                    p = 4)
-head(resultados_hw_p_3, 10)
+# Serie de consumo trimestral
+y <- df.consumo_imp$Consumo
 
+# 1. Optimización de parámetros con p=4
+rmse_hw <- function(params) {
+  alpha <- params[1]; beta <- params[2]; gamma <- params[3]
+  if (any(params <= 0) || any(params >= 1)) return(Inf)
+  
+  res <- holt_winter_p_3(y, alpha, beta, gamma, p = 4)
+  errores <- res$error[(4+1):nrow(res)]  # desde p+1
+  sqrt(mean(errores^2, na.rm = TRUE))
+}
 
+optimos <- optim(
+  par    = c(0.3, 0.2, 0.1),
+  fn     = rmse_hw,
+  method = "L-BFGS-B",
+  lower  = c(0.01, 0.01, 0.01),
+  upper  = c(0.99, 0.99, 0.99)
+)
+
+alpha_opt <- optimos$par[1]
+beta_opt  <- optimos$par[2]
+gamma_opt <- optimos$par[3]
+
+cat("Alpha óptimo:", round(alpha_opt, 4), "\n")
+cat("Beta óptimo: ", round(beta_opt, 4), "\n")
+cat("Gamma óptimo:", round(gamma_opt, 4), "\n")
+cat("RMSE mínimo: ", round(optimos$value, 4), "\n")
+
+# 2. Aplicar con parámetros óptimos
+resultados_hw_opt <- holt_winter_p_3(y,
+                                     alpha = alpha_opt,
+                                     beta  = beta_opt,
+                                     gamma = gamma_opt,
+                                     p     = 4)
+
+# 3. Métricas de error (desde p+1 = 5)
+errores_opt <- resultados_hw_opt$error[5:nrow(resultados_hw_opt)]
+reales_opt  <- resultados_hw_opt$real[5:nrow(resultados_hw_opt)]
+
+mae_hw <- mean(abs(errores_opt), na.rm = TRUE)
+rmse_hw <- sqrt(mean(errores_opt^2, na.rm = TRUE))
+ecm_hw <- mean(errores_opt^2, na.rm = TRUE)   # ECM = MSE
+
+cat("MAE : ", round(mae_hw, 2), "\n")
+cat("RMSE:", round(rmse_hw, 2), "\n")
+cat("ECM :", round(ecm_hw, 2), "\n")
+
+# 4. Gráfico comparativo
+ggplot(resultados_hw_opt[5:nrow(resultados_hw_opt), ],
+       aes(x = tiempo)) +
+  geom_line(aes(y = real,       color = "Real"), linewidth = 0.8) +
+  geom_line(aes(y = pronostico, color = "Pronóstico"), linewidth = 0.8, linetype = "dashed") +
+  scale_color_manual(values = c("Real" = "darkred", "Pronóstico" = "blue")) +
+  labs(title = "Holt-Winters (trimestral, p=4)",
+       x = "Tiempo", y = "Consumo", color = "") +
+  theme_minimal()
+
+# Aplicar diferenciación
+y <- df.consumo_imp$Consumo
+n <- length(y)
+
+# Diferenciación de primer orden
+dl_y <- numeric(n)
+for (t in 2:n) {
+  dl_y[t] <- y[t] - y[t-1]
+}
+
+# Segunda diferenciación (aplicada sobre la primera)
+dl_y2 <- numeric(n)
+for (t in 3:n) {
+  dl_y2[t] <- dl_y[t] - dl_y[t-1]
+}
+
+# Graficar original vs diferenciada
+par(mfrow = c(1,3))
+plot.ts(y, main = "Serie original (Consumo)", col = "blue")
+plot.ts(dl_y, main = "Diferenciada 1 vez", col = "red")
+plot.ts(dl_y2, main = "Diferenciada 2 veces", col = "darkgreen")
+
+acf(dl_y, main = "ACF primera diferencia")
+pacf(dl_y, main = "PACF primera diferencia")
+
+acf(dl_y2, main = "ACF segunda diferencia")
+pacf(dl_y2, main = "PACF segunda diferencia")
+
+## Ajustar un ARMA sobre la primera diferencia y comparar métricas 
 
