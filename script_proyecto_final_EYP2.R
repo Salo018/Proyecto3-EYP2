@@ -948,3 +948,5 @@ lines((length(y)+1):(length(y)+6), pronostico_6,
 plot(pronostico_6, type = "o", col = "orangered",
      main = "Pronóstico ARMA(1,2) - 6 trimestres",
      xlab = "Trimestres futuros", ylab = "Diferencia del Consumo")
+acf(pronostico_6)
+pacf(pronostico_6)
