@@ -728,14 +728,9 @@ calcular_metricas <- function(modelo, y, p, q){
   # Residuos y predicciones
   e <- ajuste$e
   y_hat <- ajuste$y_hat
-  
-  # ECM (MSE)
+
   ecm <- mean(e^2, na.rm = TRUE)
-  
-  # RECM (antes RMSE)
   recm <- sqrt(ecm)
-  
-  # MAE
   mae <- mean(abs(y - y_hat), na.rm = TRUE)
 
   return(list(ECM = ecm, RECM = recm, MAE = mae))
@@ -822,13 +817,13 @@ res_ar2      <- ajuste_ar2$e[(max(2,0)+1) : length(ajuste_ar2$e)]
 # Holt-Winter
 # k= 3 porque se estiman alpha, beta, gamma
 aic_hw     <- calcular_aic(errores_opt_p_3, k = 3)
-# ARMA(1,1): cte, ar1, ma1 → k = 3
+# ARMA(1,1) 
 aic_arma11 <- calcular_aic(res11_limpio, k = 3)
-# ARMA(1,2): cte, ar1, ma1, ma2 → k = 4
+# ARMA(1,2) 
 aic_arma12 <- calcular_aic(res12_limpio, k = 4)
-# ARMA(2,1): cte, ar1, ar2, ma1 → k = 4
+# ARMA(2,1)
 aic_arma21 <- calcular_aic(res21_limpio, k = 4)
-# AR(2): cte, ar1, ar2 → k = 3
+# AR(2)
 aic_ar2    <- calcular_aic(res_ar2, k = 3)
 
 # Tabla comparativa
@@ -869,7 +864,7 @@ sd_res <- sd(e[nn:length(e)])
 # (i) Proporción fuera de +-2sd desviaciones estándar
 fuera <- sum(e[nn:length(e)] < (media - 2*sd_res) | e[nn:length(e)] > (media + 2*sd_res))
 prop_fuera <- fuera / length(e[nn:length(e)])
-cat("Proporción fuera de ±2sd:", round(prop_fuera,4), "\n")
+cat("Proporción fuera de +- 2sd:", round(prop_fuera,4), "\n")
 # (ii) Histograma y prueba formal
 hist(e[nn:length(e)], main = "Histograma residuos ARMA(1,2)")
 
@@ -905,24 +900,23 @@ print(ar_roots)
 print(ma_roots)
 
 # PRONÓSTICO DE 6 TRIMESTRES CON ARMA(1,2)
-# Ajustar el modelo 
 ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
-# Función de pronóstico hacia adelante
+
 pronosticar_ARMA <- function(param, y, p, q, h){
   n <- length(y)
   cte <- param[1]
   phi <- if(p > 0) param[2:(p+1)] else numeric(0)
   theta <- if(q > 0) param[(p+2):(p+q+1)] else numeric(0)
-  # Residuos y predicciones históricas
+  
+  # Extraer los residuos históricos reales del ajuste previo
   ajuste <- ajustar_ARMA(param, y, p, q)
-  e <- ajuste$e
-  y_hat <- ajuste$y_hat
-  # Pronósticos futuros
+  e <- ajuste$e  
+  
   futuros <- numeric(h)
+  
   for(t in 1:h){
     ar_part <- 0
     ma_part <- 0
-    # AR usa últimos valores observados 
     if(p > 0){
       for(i in 1:p){
         if(t - i <= 0){
@@ -932,10 +926,14 @@ pronosticar_ARMA <- function(param, y, p, q, h){
         }
       }
     }
-    # MA usa últimos residuos, se asumen 0
+    
     if(q > 0){
       for(j in 1:q){
-        ma_part <- ma_part + theta[j] * 0
+        if(t - j <= 0){
+          ma_part <- ma_part + theta[j] * e[n + (t - j)]
+        } else {
+          ma_part <- ma_part + theta[j] * 0
+        }
       }
     }
     
@@ -951,7 +949,7 @@ print(pronostico_6)
 # Gráfico 
 plot(y, type = "l", col = "black",
      main = "Pronóstico ARMA(1,2) - 6 trimestres",
-     xlab = "Trimestres", ylab = "Consumo")
+     xlab = "Trimestres", ylab = "Diferencia del Consumo")
 # Ajuste histórico
 lines(ajuste12$y_hat, col = "blue", lty = 2)
 # Pronóstico 
@@ -961,4 +959,4 @@ lines((length(y)+1):(length(y)+6), pronostico_6,
 # Gráfico solo de los valores predichos
 plot(pronostico_6, type = "o", col = "orangered",
      main = "Pronóstico ARMA(1,2) - 6 trimestres",
-     xlab = "Trimestres futuros", ylab = "Consumo")
+     xlab = "Trimestres futuros", ylab = "Diferencia del Consumo")
