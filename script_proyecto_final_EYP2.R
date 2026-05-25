@@ -132,7 +132,7 @@ df.sin_nulos <- df.sin_nulos %>%
   mutate(z_score = (Consumo - mean(Consumo, na.rm = TRUE)) / sd(Consumo, na.rm = TRUE))
 
 outliers <- df.sin_nulos %>% filter(abs(z_score) > 3)
-print(outliers)
+outliers
 
 # Crear la variable periodo para df sin nulos
 df.sin_nulos_copy <- df.sin_nulos %>%
@@ -152,12 +152,12 @@ ggplot(df.sin_nulos_copy, aes(x = Periodo, y = Consumo)) +
 
 # Numero total de registros
 n_total <- nrow(df.sin_nulos_copy)
-print(n_total)
+n_total
 
 # 5% del total de registros para saber cuanto nulos se necesitan
 n_nulos <- round(0.05 * n_total)
 n_nulos
-print(n_nulos)
+n_nulos
 
 # Posiciones de outliers
 pos_outliers <- which(abs(df.sin_nulos$z_score) > 3)
@@ -279,21 +279,20 @@ resultados <- data.frame(
   MAPE = c(mape_media, mape_mediana, mape_moda, mape_interp, mape_mm, mape_locf),
   RMSE = c(rmse_media, rmse_mediana, rmse_moda, rmse_interp, rmse_mm, rmse_locf)
 )
-
-print(resultados)
+resultados
 
 # Top 3 métodos con mejores resultados
 mejores_ecm <- resultados[order(resultados$ECM), ][1:3, c("Metodo","ECM")]
-print(mejores_ecm)
+mejores_ecm
 
 mejores_mae <- resultados[order(resultados$MAE), ][1:3, c("Metodo","MAE")]
-print(mejores_mae)
+mejores_mae
 
 mejores_mape <- resultados[order(resultados$MAPE), ][1:3, c("Metodo","MAPE")]
-print(mejores_mape)
+mejores_mape
 
 mejores_rmse <- resultados[order(resultados$RMSE), ][1:3, c("Metodo","RMSE")]
-print(mejores_rmse)
+mejores_rmse
 
 # Comparación con los métodos con mejores resultados
 
@@ -314,7 +313,7 @@ comparacion <- data.frame(
   MM = valores_mm
 )
 
-print(comparacion)
+comparacion
 
 # Gráfico comparativo Moda vs LOCF vs MM
 ggplot(comparacion, aes(x = Posicion)) +
@@ -548,10 +547,9 @@ alpha_opt <- optimos$par[1]
 beta_opt  <- optimos$par[2]
 gamma_opt <- optimos$par[3]
 
-cat("Alpha óptimo:", round(alpha_opt, 4), "\n")
-cat("Beta óptimo: ", round(beta_opt, 4), "\n")
-cat("Gamma óptimo:", round(gamma_opt, 4), "\n")
-cat("RMSE mínimo: ", round(optimos$value, 4), "\n")
+alpha_opt
+beta_opt
+gamma_opt
 
 # 2. Aplicar con parámetros óptimos
 resultados_hw_opt <- holt_winter_p_3(y,
@@ -568,9 +566,9 @@ mae_hw <- mean(abs(errores_opt_p_3), na.rm = TRUE)
 rmse_hw <- sqrt(mean(errores_opt_p_3^2, na.rm = TRUE))
 ecm_hw <- mean(errores_opt_p_3^2, na.rm = TRUE)   # ECM = MSE
 
-cat("MAE : ", round(mae_hw, 2), "\n")
-cat("RMSE:", round(rmse_hw, 2), "\n")
-cat("ECM :", round(ecm_hw, 2), "\n")
+mae_hw
+rmse_hw
+ecm_hw
 
 # 4. Gráfico comparativo
 ggplot(resultados_hw_opt[5:nrow(resultados_hw_opt), ],
@@ -749,10 +747,7 @@ metricas_tabla <- data.frame(
   MAE = c(metricas11$MAE, metricas12$MAE, metricas21$MAE)
 )
 
-print(metricas_tabla)
-cat("MAE : ", round(mae_hw, 2), "\n")
-cat("RMSE:", round(rmse_hw, 2), "\n")
-cat("ECM :", round(ecm_hw, 2), "\n")
+metricas_tabla
 
 # data.frames con predicciones de cada modelo
 ajuste11 <- ajustar_ARMA(arma11$coef, y, p = 1, q = 1)
@@ -792,8 +787,7 @@ metricas_ar2 <- data.frame(
   RECM = RECM,
   MAE = MAE
 )
-
-print(metricas_ar2)
+metricas_ar2
 
 # Estimar AR(2) sobre la serie diferenciada
 ar2 <- estimar_ARMA(dl_y, p = 2, q = 0)
@@ -835,8 +829,7 @@ aic_values <- data.frame(
 print(aic_values[order(aic_values$AIC), ])
 # Mejor modelo
 best_model <- aic_values[which.min(aic_values$AIC), ]
-cat("\nEl mejor modelo según AIC es:", best_model$Modelo,
-    "con AIC =", round(best_model$AIC, 2), "\n")
+best_model
 
 # SUPUESTOS DE ARMA (1,2) modelo escogido
 ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
@@ -864,14 +857,13 @@ sd_res <- sd(e[nn:length(e)])
 # (i) Proporción fuera de +-2sd desviaciones estándar
 fuera <- sum(e[nn:length(e)] < (media - 2*sd_res) | e[nn:length(e)] > (media + 2*sd_res))
 prop_fuera <- fuera / length(e[nn:length(e)])
-cat("Proporción fuera de +- 2sd:", round(prop_fuera,4), "\n")
+prop_fuera
 # (ii) Histograma y prueba formal
 hist(e[nn:length(e)], main = "Histograma residuos ARMA(1,2)")
 
 # Supuesto 5: no existen observaciones aberrantes
 # (i) Identificar residuos fuera de +-3sd
 fuera_out <- which(e[nn:length(e)] < (media - 3*sd_res) | e[nn:length(e)] > (media + 3*sd_res))
-cat("Índices de residuos fuera de +- 3:", fuera_out, "\n")
 
 # Supuesto 6: el modelo considerado es parsiomonioso
 coeficientes <- arma12$coef
@@ -885,7 +877,7 @@ parsimonia <- data.frame(
   Estimacion = coeficientes,
   CasiCero   = abs(coeficientes) < 0.05
 )
-print(parsimonia)
+parsimonia
 
 # Supuesto 7: el modelo es admisible 
 phi <- arma12$coef[1]      # AR(1)
@@ -896,8 +888,8 @@ ar_roots <- polyroot(ar_poly)
 # Polinomio MA: 1 + theta1*L + theta2*L^2
 ma_poly <- c(1, theta)
 ma_roots <- polyroot(ma_poly)
-print(ar_roots)
-print(ma_roots)
+ar_roots
+ma_roots
 
 # PRONÓSTICO DE 6 TRIMESTRES CON ARMA(1,2)
 ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
@@ -907,7 +899,6 @@ pronosticar_ARMA <- function(param, y, p, q, h){
   cte <- param[1]
   phi <- if(p > 0) param[2:(p+1)] else numeric(0)
   theta <- if(q > 0) param[(p+2):(p+q+1)] else numeric(0)
-  
   # Extraer los residuos históricos reales del ajuste previo
   ajuste <- ajustar_ARMA(param, y, p, q)
   e <- ajuste$e  
@@ -941,11 +932,9 @@ pronosticar_ARMA <- function(param, y, p, q, h){
   }
   return(futuros)
 }
-
 # Pronóstico de 6 trimestres
 pronostico_6 <- pronosticar_ARMA(arma12$coef, y, p = 1, q = 2, h = 6)
-# Mostrar resultados
-print(pronostico_6)
+pronostico_6
 # Gráfico 
 plot(y, type = "l", col = "black",
      main = "Pronóstico ARMA(1,2) - 6 trimestres",
@@ -955,7 +944,6 @@ lines(ajuste12$y_hat, col = "blue", lty = 2)
 # Pronóstico 
 lines((length(y)+1):(length(y)+6), pronostico_6,
       col = "orangered", lty = 2, type = "o")
-
 # Gráfico solo de los valores predichos
 plot(pronostico_6, type = "o", col = "orangered",
      main = "Pronóstico ARMA(1,2) - 6 trimestres",
