@@ -58,7 +58,6 @@ head(df.consumo)
 
 ###### Subir mi punto desde aquí ######
 
-
 # ---------------- #
 # Punto 3: Consumo #
 # ---------------- #
@@ -96,8 +95,8 @@ df.consumo_copy <- df.consumo %>%
 
 # Grafica con todos los años 
 ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "navy") +
+  geom_point(color = "navy") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -108,8 +107,8 @@ ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
 # Graficar solo los años de 1960 a 1990 (esto es solo para probar)
 ggplot(data = df.consumo_copy %>% filter(Año >= 1960 & Año <= 1990),
        aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "navy") +
+  geom_point(color = "navy") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -142,7 +141,7 @@ df.sin_nulos_copy <- df.sin_nulos %>%
 
 # Visualización en la serie
 ggplot(df.sin_nulos_copy, aes(x = Periodo, y = Consumo)) +
-  geom_line(color = "blue") +
+  geom_line(color = "navy") +
   geom_point(aes(color = abs(z_score) > 3)) +
   scale_color_manual(values = c("black", "red")) +
   labs(title = "Serie con posibles outliers")
@@ -167,7 +166,7 @@ pos_outliers <- which(abs(df.sin_nulos$z_score) > 3)
 faltan <- n_nulos - length(pos_outliers)
 
 # Seleccionar posiciones aleatorias adicionales
-set.seed(2242055)  # Semilla para reproducibilidad
+set.seed(2242055)  # semilla para reproducibilidad
 pos_extra <- sample(setdiff(1:n_total, pos_outliers), faltan)
 
 # Unir todas las posiciones
@@ -211,7 +210,6 @@ mae_media <- calc_mae(df.sin_nulos$Consumo, df.media$Consumo, pos_nulos)
 mape_media <- calc_mape(df.sin_nulos$Consumo, df.media$Consumo, pos_nulos)
 rmse_media <- calc_rmse(df.sin_nulos$Consumo, df.media$Consumo, pos_nulos)
 
-
 # Imputación con MEDIANA
 mediana_val <- median(df.sin_nulos$Consumo, na.rm = TRUE)
 df.mediana <- df.nulos_artificiales
@@ -221,7 +219,6 @@ ecm_mediana <- calc_ecm(df.sin_nulos$Consumo, df.mediana$Consumo, pos_nulos)
 mae_mediana <- calc_mae(df.sin_nulos$Consumo, df.mediana$Consumo, pos_nulos)
 mape_mediana <- calc_mape(df.sin_nulos$Consumo, df.mediana$Consumo, pos_nulos)
 rmse_mediana <- calc_rmse(df.sin_nulos$Consumo, df.mediana$Consumo, pos_nulos)
-
 
 # Imputación con MODA
 # Función para calcular la moda
@@ -238,7 +235,6 @@ mae_moda <- calc_mae(df.sin_nulos$Consumo, df.moda$Consumo, pos_nulos)
 mape_moda <- calc_mape(df.sin_nulos$Consumo, df.moda$Consumo, pos_nulos)
 rmse_moda <- calc_rmse(df.sin_nulos$Consumo, df.moda$Consumo, pos_nulos)
 
-
 # Imputación con INTERPOLACIÓN LINEAL
 df.interp <- df.nulos_artificiales
 df.interp$Consumo <- na.approx(df.interp$Consumo, na.rm = FALSE)
@@ -248,15 +244,14 @@ mae_interp <- calc_mae(df.sin_nulos$Consumo, df.interp$Consumo, pos_nulos)
 mape_interp <- calc_mape(df.sin_nulos$Consumo, df.interp$Consumo, pos_nulos)
 rmse_interp <- calc_rmse(df.sin_nulos$Consumo, df.interp$Consumo, pos_nulos)
 
-
 # Imputación con MEDIAS MOVILES
 # Medias Móviles con ventana = 3
 k <- 3
 df.mm <- df.nulos_artificiales
 for (i in which(is.na(df.mm$Consumo))) {
-  # Definimos la ventana alrededor del NA
+  # Definimos la ventana alrededor del na
   idx <- max(1, i - k %/% 2) : min(nrow(df.mm), i + k %/% 2)
-  idx <- idx[idx != i] # Excluimos el propio NA
+  idx <- idx[idx != i] # excluimos el propio na
   df.mm$Consumo[i] <- mean(df.mm$Consumo[idx], na.rm = TRUE)
 }
 # Comparación contra valores reales en df.sin_nulos
@@ -288,8 +283,6 @@ resultados <- data.frame(
 print(resultados)
 
 # Top 3 métodos con mejores resultados
-cat("\nTop 3 con mejores resultados\n")
-
 mejores_ecm <- resultados[order(resultados$ECM), ][1:3, c("Metodo","ECM")]
 print(mejores_ecm)
 
@@ -325,10 +318,10 @@ print(comparacion)
 
 # Gráfico comparativo Moda vs LOCF vs MM
 ggplot(comparacion, aes(x = Posicion)) +
-  geom_point(aes(y = Real), color = "black", size = 3) +
-  geom_point(aes(y = Moda), color = "red", size = 2) +
-  geom_point(aes(y = LOCF), color = "blue", size = 2) +
-  geom_point(aes(y = MM), color = "green", size = 2) +
+  geom_point(aes(y = Real), color = "navy", size = 2.5) +
+  geom_point(aes(y = Moda), color = "darkorange", size = 2) +
+  geom_point(aes(y = LOCF), color = "limegreen", size = 2) +
+  geom_point(aes(y = MM), color = "deeppink", size = 2) +
   labs(title = "Comparación imputación: Moda vs LOCF vs MM",
        y = "Consumo", x = "Posición (índice)") +
   theme_minimal()
@@ -352,8 +345,8 @@ df.moda_copy <- df.moda %>%
          Periodo = paste(Año, Trimestre_num, sep = "-"))
 # Grafica  
 ggplot(data = df.moda_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "chocolate") +
+  geom_point(color = "chocolate") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -367,8 +360,8 @@ df.locf_copy <- df.locf %>%
          Periodo = paste(Año, Trimestre_num, sep = "-"))
 # Grafica  
 ggplot(data = df.locf_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "darkgreen") +
+  geom_point(color = "darkgreen") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -382,8 +375,8 @@ df.mm_copy <- df.mm %>%
          Periodo = paste(Año, Trimestre_num, sep = "-"))
 # Grafica 
 ggplot(data = df.mm_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "maroon") +
+  geom_point(color = "maroon") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -395,8 +388,8 @@ ggplot(data = df.mm_copy, aes(x = Periodo, y = Consumo, group = 1)) +
 
 # Grafica con todos los años 
 ggplot(data = df.sin_nulos_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "cornflowerblue") +
+  geom_point(color = "cornflowerblue") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -404,16 +397,14 @@ ggplot(data = df.sin_nulos_copy, aes(x = Periodo, y = Consumo, group = 1)) +
   ) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-# IMPUTACIÓN AL DF ORIGINAL
-
-# Imputación con MEDIAS MÓVILES sobre df.consumo_copy
+# IMPUTACIÓN AL DF ORIGINAL CON MM
 k <- 3
-df.consumo_imp <- df.consumo_copy   # Usamos tu df original con nulos
+df.consumo_imp <- df.consumo_copy
 
 for (i in which(is.na(df.consumo_imp$Consumo))) {
-  # Definimos la ventana alrededor del NA
+  # Definimos la ventana alrededor del na
   idx <- max(1, i - k %/% 2) : min(nrow(df.consumo_imp), i + k %/% 2)
-  idx <- idx[idx != i] # Excluimos el propio NA
+  idx <- idx[idx != i]
   df.consumo_imp$Consumo[i] <- mean(df.consumo_imp$Consumo[idx], na.rm = TRUE)
 }
 
@@ -428,8 +419,8 @@ data.frame(
 # Revisar visualmente
 # Original
 ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "navy") +
+  geom_point(color = "navy") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -439,8 +430,8 @@ ggplot(data = df.consumo_copy, aes(x = Periodo, y = Consumo, group = 1)) +
 
 # Imputado
 ggplot(data = df.consumo_imp, aes(x = Periodo, y = Consumo, group = 1)) +
-  geom_line(color = "blue") +
-  geom_point(color = "red") +
+  geom_line(color = "purple4") +
+  geom_point(color = "purple4") +
   labs(
     x = "Periodo (Año-Trimestre)",
     y = "Consumo personal (%)",
@@ -487,7 +478,7 @@ cat("Varianza total:", var(df.consumo_imp$Consumo))
 
 # SERIE NO ESTACIONARIA
 
-plot.ts(df.consumo_imp$Consumo)
+plot.ts(consumo_ts)
 
 # MODELOS 
 
@@ -501,13 +492,10 @@ holt_winter_p_3 <- function(y, alpha = 0.3, beta = 0.2, gamma = 0.1, p = 4) {
   S <- numeric(n)     
   y_hat <- numeric(n) 
   
-  # Nivel inicial
   F[p] <- mean(y[1:p])
   
-  # Tendencia inicial
   T[p] <- (mean(y[(p+1):(2*p)]) - mean(y[1:p])) / p
   
-  # Índices estacionales iniciales (promedio de varios ciclos si hay suficientes datos)
   for (i in 1:p) {
     S[i] <- mean(y[seq(i, p*2, by=p)]) / F[p]
   }
@@ -573,12 +561,12 @@ resultados_hw_opt <- holt_winter_p_3(y,
                                      p     = 4)
 
 # 3. Métricas de error (desde p+1 = 5)
-errores_opt <- resultados_hw_opt$error[5:nrow(resultados_hw_opt)]
+errores_opt_p_3 <- resultados_hw_opt$error[5:nrow(resultados_hw_opt)]
 reales_opt  <- resultados_hw_opt$real[5:nrow(resultados_hw_opt)]
 
-mae_hw <- mean(abs(errores_opt), na.rm = TRUE)
-rmse_hw <- sqrt(mean(errores_opt^2, na.rm = TRUE))
-ecm_hw <- mean(errores_opt^2, na.rm = TRUE)   # ECM = MSE
+mae_hw <- mean(abs(errores_opt_p_3), na.rm = TRUE)
+rmse_hw <- sqrt(mean(errores_opt_p_3^2, na.rm = TRUE))
+ecm_hw <- mean(errores_opt_p_3^2, na.rm = TRUE)   # ECM = MSE
 
 cat("MAE : ", round(mae_hw, 2), "\n")
 cat("RMSE:", round(rmse_hw, 2), "\n")
@@ -589,12 +577,12 @@ ggplot(resultados_hw_opt[5:nrow(resultados_hw_opt), ],
        aes(x = tiempo)) +
   geom_line(aes(y = real,       color = "Real"), linewidth = 0.8) +
   geom_line(aes(y = pronostico, color = "Pronóstico"), linewidth = 0.8, linetype = "dashed") +
-  scale_color_manual(values = c("Real" = "darkred", "Pronóstico" = "blue")) +
+  scale_color_manual(values = c("Real" = "navy", "Pronóstico" = "maroon2")) +
   labs(title = "Holt-Winters (trimestral, p=4)",
        x = "Tiempo", y = "Consumo", color = "") +
   theme_minimal()
 
-# Aplicar diferenciación
+# Aplicar diferenciación para probar modelos ARMA Y AR
 y <- df.consumo_imp$Consumo
 n <- length(y)
 
@@ -611,9 +599,9 @@ for (t in 3:n) {
 }
 
 # Graficar original vs diferenciada
-plot.ts(y, main = "Serie original (Consumo)", col = "blue")
+plot.ts(y, main = "Serie original (Consumo)", col = "navy")
 plot.ts(dl_y, main = "Diferenciada 1 vez", col = "red")
-plot.ts(dl_y2, main = "Diferenciada 2 veces", col = "darkgreen")
+plot.ts(dl_y2, main = "Diferenciada 2 veces", col = "olivedrab")
 
 acf(dl_y)
 pacf(dl_y)
@@ -624,11 +612,9 @@ pacf(dl_y2)
 acf(consumo_ts)
 pacf(consumo_ts)
 
-consumo_ts
-
 ## Ajustar un ARMA sobre la primera diferencia y comparar métricas 
-# Script de modelos ARMA(1,1), ARMA(1,2) y ARMA(2,1)
-# Funciones ARMA
+# Funciones ARMA RMA(1,1), ARMA(1,2) y ARMA(2,1)
+y <- dl_y[-1]
 residuos_ARMA <- function(param, y, p, q){
   n <- length(y)
   cte <- param[1]
@@ -702,18 +688,17 @@ ajustar_ARMA <- function(param, y, p, q){
 graficar_ARMA <- function(modelo, y, p, q, titulo){
   ajuste <- ajustar_ARMA(modelo$coef, y, p, q)
   
-  # Serie vs predicción SIN dividir ventana
   plot(y, type = "l", col = "red",
        main = titulo,
        ylab = "Serie simulada", xlab = "Tiempo")
-  lines(ajuste$y_hat, col = "blue")
+  lines(ajuste$y_hat, col = "navy")
 
 }
 
 graficar_residuos <- function(modelo, y, p, q, titulo){
   ajuste <- ajustar_ARMA(modelo$coef, y, p, q)
   
-  # Panel de residuos
+  # residuos
   par(mfrow = c(1,3))
   plot(ajuste$e, type = "l", main = paste("Residuos", titulo))
   hist(ajuste$e, main = paste("Histograma", titulo))
@@ -736,6 +721,244 @@ graficar_residuos(arma11, y, p = 1, q = 1, titulo = "ARMA(1,1)")
 graficar_residuos(arma12, y, p = 1, q = 2, titulo = "ARMA(1,2)")
 graficar_residuos(arma21, y, p = 2, q = 1, titulo = "ARMA(2,1)")
 
+# Función para calcular métricas
+calcular_metricas <- function(modelo, y, p, q){
+  ajuste <- ajustar_ARMA(modelo$coef, y, p, q)
+  
+  # Residuos y predicciones
+  e <- ajuste$e
+  y_hat <- ajuste$y_hat
+  
+  # ECM (MSE)
+  ecm <- mean(e^2, na.rm = TRUE)
+  
+  # RECM (antes RMSE)
+  recm <- sqrt(ecm)
+  
+  # MAE
+  mae <- mean(abs(y - y_hat), na.rm = TRUE)
 
+  return(list(ECM = ecm, RECM = recm, MAE = mae))
+}
 
+# Calcular métricas para cada modelo
+metricas11 <- calcular_metricas(arma11, y, p = 1, q = 1)
+metricas12 <- calcular_metricas(arma12, y, p = 1, q = 2)
+metricas21 <- calcular_metricas(arma21, y, p = 2, q = 1)
 
+# Tabla comparativa
+metricas_tabla <- data.frame(
+  Modelo = c("ARMA(1,1)", "ARMA(1,2)", "ARMA(2,1)"),
+  ECM = c(metricas11$ECM, metricas12$ECM, metricas21$ECM),
+  RECM = c(metricas11$RECM, metricas12$RECM, metricas21$RECM),
+  MAE = c(metricas11$MAE, metricas12$MAE, metricas21$MAE)
+)
+
+print(metricas_tabla)
+cat("MAE : ", round(mae_hw, 2), "\n")
+cat("RMSE:", round(rmse_hw, 2), "\n")
+cat("ECM :", round(ecm_hw, 2), "\n")
+
+# data.frames con predicciones de cada modelo
+ajuste11 <- ajustar_ARMA(arma11$coef, y, p = 1, q = 1)
+ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
+ajuste21 <- ajustar_ARMA(arma21$coef, y, p = 2, q = 1)
+
+# Organizar en una sola tabla
+predicciones_tabla <- data.frame(
+  Real   = y,
+  ARMA11 = ajuste11$y_hat,
+  ARMA12 = ajuste12$y_hat,
+  ARMA21 = ajuste21$y_hat
+)
+
+# Mostrar primeras filas
+head(predicciones_tabla, 10)
+
+# Probar modelo 5: AR (2)
+ar2 <- estimar_ARMA(y, p = 2, q = 0)
+
+# Ajustar el modelo para obtener predicciones
+ajuste_ar2 <- ajustar_ARMA(ar2$coef, y, p = 2, q = 0)
+
+# Extraer residuos y predicciones
+e_ar2 <- ajuste_ar2$e
+y_hat_ar2 <- ajuste_ar2$y_hat
+
+# Calcular métricas
+ECM  <- mean(e_ar2^2, na.rm = TRUE)
+RECM <- sqrt(ECM)
+MAE  <- mean(abs(e_ar2), na.rm = TRUE)
+
+# Tabla de resultados
+metricas_ar2 <- data.frame(
+  Modelo = "AR(2)",
+  ECM = ECM,
+  RECM = RECM,
+  MAE = MAE
+)
+
+print(metricas_ar2)
+
+# Estimar AR(2) sobre la serie diferenciada
+ar2 <- estimar_ARMA(dl_y, p = 2, q = 0)
+
+# Graficar serie vs predicciones
+graficar_ARMA(ar2, dl_y, p = 2, q = 0, titulo = "AR(2)")
+
+# Calcular AIC para escoger el mejor modelo
+# Función AIC 
+calcular_aic <- function(residuos, k) {
+  n   <- length(residuos)
+  sse <- sum(residuos^2)
+  n * log(sse / n) + 2 * k
+}
+# Residuos limpios de cada modelo 
+res11_limpio <- ajuste11$e[(max(1,1)+1) : length(ajuste11$e)]
+res12_limpio <- ajuste12$e[(max(1,2)+1) : length(ajuste12$e)]
+res21_limpio <- ajuste21$e[(max(2,1)+1) : length(ajuste21$e)]
+res_ar2      <- ajuste_ar2$e[(max(2,0)+1) : length(ajuste_ar2$e)]
+
+# Holt-Winter
+# k= 3 porque se estiman alpha, beta, gamma
+aic_hw     <- calcular_aic(errores_opt_p_3, k = 3)
+# ARMA(1,1): cte, ar1, ma1 → k = 3
+aic_arma11 <- calcular_aic(res11_limpio, k = 3)
+# ARMA(1,2): cte, ar1, ma1, ma2 → k = 4
+aic_arma12 <- calcular_aic(res12_limpio, k = 4)
+# ARMA(2,1): cte, ar1, ar2, ma1 → k = 4
+aic_arma21 <- calcular_aic(res21_limpio, k = 4)
+# AR(2): cte, ar1, ar2 → k = 3
+aic_ar2    <- calcular_aic(res_ar2, k = 3)
+
+# Tabla comparativa
+aic_values <- data.frame(
+  Modelo = c("Holt-Winter", "ARMA(1,1)", "ARMA(1,2)", "ARMA(2,1)", "AR(2)"),
+  AIC    = c(aic_hw, aic_arma11, aic_arma12, aic_arma21, aic_ar2)
+)
+# Mostrar ordenados de menor a mayor AIC
+print(aic_values[order(aic_values$AIC), ])
+# Mejor modelo
+best_model <- aic_values[which.min(aic_values$AIC), ]
+cat("\nEl mejor modelo según AIC es:", best_model$Modelo,
+    "con AIC =", round(best_model$AIC, 2), "\n")
+
+# SUPUESTOS DE ARMA (1,2) modelo escogido
+ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
+e <- ajuste12$e
+nn <- max(1,2) + 1
+
+# Supuesto 1: media cero
+mean_residuos <- mean(e[nn:length(e)], na.rm = TRUE)
+mean_residuos
+
+# Supuesto 2: varianza constante
+plot(e[nn:length(e)], type = "l", main = "Residuos ARMA(1,2)",
+     ylab = "Residuos", xlab = "Tiempo")
+
+# Supuesto 3: independencia
+# (i) FAC y FACP 
+acf(e[nn:length(e)])
+pacf(e[nn:length(e)])
+# (ii) Estadistico de Q de box  
+Box.test(e[nn:length(e)], lag = 20, type = "Ljung-Box")
+
+# Supuesto 4: distribución normal
+media <- mean(e[nn:length(e)])
+sd_res <- sd(e[nn:length(e)])
+# (i) Proporción fuera de +-2sd desviaciones estándar
+fuera <- sum(e[nn:length(e)] < (media - 2*sd_res) | e[nn:length(e)] > (media + 2*sd_res))
+prop_fuera <- fuera / length(e[nn:length(e)])
+cat("Proporción fuera de ±2sd:", round(prop_fuera,4), "\n")
+# (ii) Histograma y prueba formal
+hist(e[nn:length(e)], main = "Histograma residuos ARMA(1,2)")
+
+# Supuesto 5: no existen observaciones aberrantes
+# (i) Identificar residuos fuera de +-3sd
+fuera_out <- which(e[nn:length(e)] < (media - 3*sd_res) | e[nn:length(e)] > (media + 3*sd_res))
+cat("Índices de residuos fuera de +- 3:", fuera_out, "\n")
+
+# Supuesto 6: el modelo considerado es parsiomonioso
+coeficientes <- arma12$coef
+# Asignar nombres si no existen
+if(is.null(names(coeficientes)) || all(names(coeficientes) == "")){
+  names(coeficientes) <- paste0("Coef", seq_along(coeficientes))
+}
+# Criterio: coeficiente cercano a 0 
+parsimonia <- data.frame(
+  Parametro  = names(coeficientes),
+  Estimacion = coeficientes,
+  CasiCero   = abs(coeficientes) < 0.05
+)
+print(parsimonia)
+
+# Supuesto 7: el modelo es admisible 
+phi <- arma12$coef[1]      # AR(1)
+theta <- arma12$coef[2:3]  # MA(2)
+# Polinomio AR: 1 - phi*L
+ar_poly <- c(1, -phi)
+ar_roots <- polyroot(ar_poly)
+# Polinomio MA: 1 + theta1*L + theta2*L^2
+ma_poly <- c(1, theta)
+ma_roots <- polyroot(ma_poly)
+print(ar_roots)
+print(ma_roots)
+
+# PRONÓSTICO DE 6 TRIMESTRES CON ARMA(1,2)
+# Ajustar el modelo 
+ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
+# Función de pronóstico hacia adelante
+pronosticar_ARMA <- function(param, y, p, q, h){
+  n <- length(y)
+  cte <- param[1]
+  phi <- if(p > 0) param[2:(p+1)] else numeric(0)
+  theta <- if(q > 0) param[(p+2):(p+q+1)] else numeric(0)
+  # Residuos y predicciones históricas
+  ajuste <- ajustar_ARMA(param, y, p, q)
+  e <- ajuste$e
+  y_hat <- ajuste$y_hat
+  # Pronósticos futuros
+  futuros <- numeric(h)
+  for(t in 1:h){
+    ar_part <- 0
+    ma_part <- 0
+    # AR usa últimos valores observados 
+    if(p > 0){
+      for(i in 1:p){
+        if(t - i <= 0){
+          ar_part <- ar_part + phi[i] * y[n + (t - i)]
+        } else {
+          ar_part <- ar_part + phi[i] * futuros[t - i]
+        }
+      }
+    }
+    # MA usa últimos residuos, se asumen 0
+    if(q > 0){
+      for(j in 1:q){
+        ma_part <- ma_part + theta[j] * 0
+      }
+    }
+    
+    futuros[t] <- cte + ar_part + ma_part
+  }
+  return(futuros)
+}
+
+# Pronóstico de 6 trimestres
+pronostico_6 <- pronosticar_ARMA(arma12$coef, y, p = 1, q = 2, h = 6)
+# Mostrar resultados
+print(pronostico_6)
+# Gráfico 
+plot(y, type = "l", col = "black",
+     main = "Pronóstico ARMA(1,2) - 6 trimestres",
+     xlab = "Trimestres", ylab = "Consumo")
+# Ajuste histórico
+lines(ajuste12$y_hat, col = "blue", lty = 2)
+# Pronóstico 
+lines((length(y)+1):(length(y)+6), pronostico_6,
+      col = "orangered", lty = 2, type = "o")
+
+# Gráfico solo de los valores predichos
+plot(pronostico_6, type = "o", col = "orangered",
+     main = "Pronóstico ARMA(1,2) - 6 trimestres",
+     xlab = "Trimestres futuros", ylab = "Consumo")
