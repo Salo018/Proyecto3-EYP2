@@ -415,30 +415,18 @@ fitted_ARMA_p_1 <- function(param, y, p, q){
 modelo_arma.0.1_p_1 <- estimar_ARMA_p_1(datos_1_limpio$yt, p = 0, q = 1)
 modelo_arma.1.0_p_1 <- estimar_ARMA_p_1(datos_1_limpio$yt, p = 1, q = 0)
 modelo_arma.1.1_p_1 <- estimar_ARMA_p_1(datos_1_limpio$yt, p = 1, q = 1)
-modelo_arma.2.1_p_1 <- estimar_ARMA_p_1(datos_1_limpio$yt, p = 2, q = 1)
-modelo_arma.1.2_p_1 <- estimar_ARMA_p_1(datos_1_limpio$yt, p = 1, q = 2)
-modelo_arma.2.2_p_1 <- estimar_ARMA_p_1(datos_1_limpio$yt, p = 2, q = 2)
 
 resultado_arma.0.1_p_1 <- fitted_ARMA_p_1(modelo_arma.0.1_p_1$coef, datos_1_limpio$yt, p = 0, q = 1)
 resultado_arma.1.0_p_1 <- fitted_ARMA_p_1(modelo_arma.1.0_p_1$coef, datos_1_limpio$yt, p = 1, q = 0)
 resultado_arma.1.1_p_1 <- fitted_ARMA_p_1(modelo_arma.1.1_p_1$coef, datos_1_limpio$yt, p = 1, q = 1)
-resultado_arma.2.1_p_1 <- fitted_ARMA_p_1(modelo_arma.2.1_p_1$coef, datos_1_limpio$yt, p = 2, q = 1)
-resultado_arma.1.2_p_1 <- fitted_ARMA_p_1(modelo_arma.1.2_p_1$coef, datos_1_limpio$yt, p = 1, q = 2)
-resultado_arma.2.2_p_1 <- fitted_ARMA_p_1(modelo_arma.2.2_p_1$coef, datos_1_limpio$yt, p = 2, q = 2)
 
 metricas_arma.0.1_p_1  <- metricas_error_mov(resultado_arma.0.1_p_1)
 metricas_arma.1.0_p_1  <- metricas_error_mov(resultado_arma.1.0_p_1)
 metricas_arma.1.1_p_1  <- metricas_error_mov(resultado_arma.1.1_p_1)
-metricas_arma.2.1_p_1  <- metricas_error_mov(resultado_arma.2.1_p_1)
-metricas_arma.1.2_p_1  <- metricas_error_mov(resultado_arma.1.2_p_1)
-metricas_arma.2.2_p_1  <- metricas_error_mov(resultado_arma.2.2_p_1)
 
 metricas_arma.0.1_p_1
 metricas_arma.1.0_p_1
 metricas_arma.1.1_p_1
-metricas_arma.2.1_p_1
-metricas_arma.1.2_p_1
-metricas_arma.2.2_p_1
 
 # Grafico de valores reales y pronosticos con MA(1)
 plot(
