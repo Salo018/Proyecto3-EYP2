@@ -879,18 +879,6 @@ parsimonia <- data.frame(
 )
 parsimonia
 
-# Supuesto 7: el modelo es admisible 
-phi <- arma12$coef[1]      # AR(1)
-theta <- arma12$coef[2:3]  # MA(2)
-# Polinomio AR: 1 - phi*L
-ar_poly <- c(1, -phi)
-ar_roots <- polyroot(ar_poly)
-# Polinomio MA: 1 + theta1*L + theta2*L^2
-ma_poly <- c(1, theta)
-ma_roots <- polyroot(ma_poly)
-ar_roots
-ma_roots
-
 # PRONÓSTICO DE 6 TRIMESTRES CON ARMA(1,2)
 ajuste12 <- ajustar_ARMA(arma12$coef, y, p = 1, q = 2)
 
