@@ -6,6 +6,12 @@
 #install.packages("ggcorrplot") # Visualización
 #install.packages("readxl")     # Lectura de Excel
 
+# Mini Proyecto 3 - Estadistica 2
+
+# Juan Esteban Paredes - 2240567
+# Sofia Reyes - 2240094
+# Salome Rivas - 2242055
+
 # Cargar librerías
 library(ggplot2)
 library(naniar)
