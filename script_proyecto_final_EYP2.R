@@ -924,7 +924,7 @@ adf.test(dl_y)
 # Graficar serie original vs diferenciada
 par(mfrow = c(1,2)) 
 plot.ts(y, main = "Serie original (Viviendas)", col = "#5D478B")
-plot.ts(dl_y, main = "Serie diferenciada (1 vez)", col = "indianred3")
+plot.ts(dl_y, main = "Serie diferenciada (2 veces)", col = "indianred3")
 
 
 # Graficas de ACF Y PACF para la serie diferenciada 
