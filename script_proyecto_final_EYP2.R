@@ -936,5 +936,15 @@ lines((length(y)+1):(length(y)+6), pronostico_6,
 plot(pronostico_6, type = "o", col = "orangered",
      main = "Pronóstico ARMA(1,2) - 6 trimestres",
      xlab = "Trimestres futuros", ylab = "Diferencia del Consumo")
+
+# GRAFICO2
+periodos_futuros <- c("2016-4","2017-1","2017-2","2017-3","2017-4","2018-1")
+# Gráfico solo de los valores predichos
+plot(pronostico_6, type = "o", col = "orangered",
+     main = "Pronóstico ARMA(1,2) - 6 trimestres",
+     xlab = "Trimestres futuros", ylab = "Diferencia del Consumo",
+     xaxt = "n")
+axis(1, at = 1:6, labels = periodos_futuros)
+
 acf(pronostico_6)
 pacf(pronostico_6)
