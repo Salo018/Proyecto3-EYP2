@@ -826,7 +826,7 @@ aic_values <- data.frame(
   AIC    = c(aic_hw, aic_arma11, aic_arma12, aic_arma21, aic_ar2)
 )
 # Mostrar ordenados de menor a mayor AIC
-print(aic_values[order(aic_values$AIC), ])
+aic_values[order(aic_values$AIC), ]
 # Mejor modelo
 best_model <- aic_values[which.min(aic_values$AIC), ]
 best_model
@@ -864,7 +864,7 @@ hist(e[nn:length(e)], main = "Histograma residuos ARMA(1,2)")
 # Supuesto 5: no existen observaciones aberrantes
 # (i) Identificar residuos fuera de +-3sd
 fuera_out <- which(e[nn:length(e)] < (media - 3*sd_res) | e[nn:length(e)] > (media + 3*sd_res))
-
+fuera_out
 # Supuesto 6: el modelo considerado es parsiomonioso
 coeficientes <- arma12$coef
 # Asignar nombres si no existen
